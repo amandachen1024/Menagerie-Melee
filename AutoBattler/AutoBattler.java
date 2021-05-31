@@ -1,5 +1,6 @@
 package AutoBattler;
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -14,10 +15,15 @@ public class AutoBattler extends JFrame implements ActionListener
     private static String choice = "";
 
     private static JButton startButton;
+    private static JTextField textField1;
+    private static JTextField textField2;
+    private static JLabel startLabel;
     private static JButton choose1;
     private static JButton choose2;
     private static JButton choose3;
+    private static JLabel recruitLabel;
     private static JButton startBattle;
+    private static JLabel battleLabel;
 
     private static JPanel startPanel;
     private static JPanel recruitPanel;
@@ -26,34 +32,70 @@ public class AutoBattler extends JFrame implements ActionListener
     private static GridBagConstraints constraints;
 
     private static Warband currentWarband;
-    private static HashMap<String, Fighter> map;
+    private static HashMap<String, Fighter> fighterMap;
+    private static HashMap<Warband, Integer> warbandMap;
 
     private static CardLayout card;
     private static Container c;
+
+    private static Object lock;
+
+    private static Warband w1;
+    private static Warband w2;
 
     public AutoBattler()
     {
         setSize(1750, 1000);
 
-        startPanel = new JPanel();
+        startPanel = new JPanel(new GridBagLayout());
         recruitPanel = new JPanel(new GridBagLayout());
         battlePanel = new JPanel();
         fightPanel = new JPanel(new GridBagLayout());
         constraints = new GridBagConstraints();
 
         startButton = new JButton("Press to start");
+        textField1 = new JTextField("Player 1");
+        textField2 = new JTextField("Player 2");
+        startLabel = new JLabel("Enter your names:");
+
+        recruitLabel = new JLabel();
         choose1 = new JButton("Choose 1st option");
         choose2 = new JButton("Choose 2nd option");
         choose3 = new JButton("Choose 3rd option");
 
         startBattle = new JButton("Start battle");
 
+        battleLabel = new JLabel("Battle begins");
+        battleLabel.setSize(200, 200);
 
-        startPanel.add(startButton);
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        constraints.ipady = 100;
+        startPanel.add(startLabel, constraints);
 
+        constraints.gridy = 1;
+        constraints.ipady = 0;
+        constraints.ipadx = 25;
+        startPanel.add(textField1, constraints);
 
+        constraints.gridy = 2;
+        startPanel.add(textField2, constraints);
+
+        constraints.gridy = 4;
+        constraints.ipady = 10;
+        constraints.ipadx = 0;
+        startPanel.add(startButton, constraints);
 
         battlePanel.add(startBattle);
+
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.fill = GridBagConstraints.VERTICAL;
+        constraints.ipady = 100;
+        constraints.gridx = 2;
+        constraints.gridy = 1;
+        fightPanel.add(battleLabel, constraints);
+        constraints.fill = 0;
+
 
         /*
         Fighter fighter1 = new Fighter(1);
@@ -99,25 +141,31 @@ public class AutoBattler extends JFrame implements ActionListener
     }
     public static void recruit(Warband w) {
         currentWarband = w;
+        recruitLabel.setText("Recruit for " + currentWarband.getPlayer());
         recruitPanel.removeAll();
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        constraints.ipady = 100;
+        recruitPanel.add(recruitLabel, constraints);
             choiceMade = false;
-            Fighter option1 = new Fighter((int) (Math.random() * 5));
-            Fighter option2 = new Fighter((int) (Math.random() * 5));
-            Fighter option3 = new Fighter((int) (Math.random() * 5));
-            map = new HashMap<String, Fighter>();
-            map.put("choose1", option1);
-            map.put("choose2", option2);
-            map.put("choose3", option3);
+            Fighter option1 = new Fighter((int) (Math.random() * 5), w);
+            Fighter option2 = new Fighter((int) (Math.random() * 5), w);
+            Fighter option3 = new Fighter((int) (Math.random() * 5), w);
+            fighterMap = new HashMap<String, Fighter>();
+            fighterMap.put("choose1", option1);
+            fighterMap.put("choose2", option2);
+            fighterMap.put("choose3", option3);
             //constraints.fill = GridBagConstraints.VERTICAL;
             constraints.ipadx = 45;
+            constraints.ipady = 0;
             constraints.gridx = 0;
-            constraints.gridy = 0;
+            constraints.gridy = 1;
             recruitPanel.add(option1.getPanel(), constraints);
             constraints.gridx = 1;
-            constraints.gridy = 0;
+            constraints.gridy = 1;
             recruitPanel.add(option2.getPanel(), constraints);
             constraints.gridx = 2;
-            constraints.gridy = 0;
+            constraints.gridy = 1;
             recruitPanel.add(option3.getPanel(), constraints);
             constraints.gridx = 0;
             constraints.gridy = 2;
@@ -136,10 +184,25 @@ public class AutoBattler extends JFrame implements ActionListener
 
     }
 
+    static void showWarband(Warband w)
+    {
+        for (int i = 0; i < w.getLength(); i++)
+        {
+            constraints.ipadx = 25;
+            constraints.gridx = i;
+            constraints.gridy = warbandMap.get(w);
+            fightPanel.add(w.getFighter(i).getPanel(), constraints);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e)
     {
         card.next(c);
+        synchronized (lock)
+        {
+            lock.notify();
+        }
     }
 
 
@@ -156,12 +219,22 @@ public class AutoBattler extends JFrame implements ActionListener
             if (currentWarband.getLength() < 5) {
                 choiceMade = true;
                 choice = name;
-                currentWarband.addFighter((map.get(choice)));
+                currentWarband.addFighter((fighterMap.get(choice)));
                 System.out.println(currentWarband);
                 if (currentWarband.getLength() < 5) {
                     recruit(currentWarband);
                 }
+                else
+                {
+                    if (currentWarband.equals(w2)) {
+                        card.next(c);
+                    }
+                    synchronized (lock) {
+                        lock.notify();
+                    }
+                }
             }
+
             return;
             //System.out.println(choice);
         }
@@ -170,11 +243,69 @@ public class AutoBattler extends JFrame implements ActionListener
 
 
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws InterruptedException {
         new AutoBattler();
-        Warband w = new Warband("player");
-        recruit(w);
+        lock = new Object();
+        synchronized (lock)
+        {
+            lock.wait();
+        }
+
+        synchronized (lock)
+        {
+            w1 = new Warband(textField1.getText());
+            recruit(w1);
+            lock.wait();
+        }
+
+        synchronized (lock)
+        {
+            w2 = new Warband(textField2.getText());
+            recruit(w2);
+            lock.wait();
+        }
+
+        warbandMap = new HashMap<Warband, Integer>();
+        warbandMap.put(w1, 0);
+        warbandMap.put(w2, 2);
+        showWarband(w1);
+        showWarband(w2);
+        synchronized (lock) {
+            lock.wait();
+            lock.wait(2000);
+        }
+        int counter1 = 0;
+        int counter2 = 0;
+        while (w1.getNumAlive() > 0 && w2.getNumAlive() > 0) {
+            if (counter1 > w1.getNumAlive()-1)
+            {
+                counter1 = 0;
+            }
+            battleLabel.setText(Fighter.attack(w1.getFighter(counter1), w2.getFighter((int) (Math.random()*w2.getNumAlive()))));
+            fightPanel.repaint();
+            fightPanel.revalidate();
+            counter1++;
+            synchronized (lock)
+            {
+                lock.wait(1000);
+            }
+            if (w1.getNumAlive() <= 0 || w2.getNumAlive() <= 0)
+            {
+                break;
+            }
+            if (counter2 > w2.getNumAlive()-1)
+            {
+                counter2 = 0;
+            }
+            battleLabel.setText(Fighter.attack(w2.getFighter(counter2), w1.getFighter((int) (Math.random()*w1.getNumAlive()))));
+            fightPanel.repaint();
+            fightPanel.revalidate();
+            counter2++;
+            synchronized (lock)
+            {
+                lock.wait(2000);
+            }
+        }
         System.out.println("done");
 
     }

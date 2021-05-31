@@ -42,13 +42,24 @@ public class Warband
 
     public Fighter getFighter(int i)
     {
-        return warband.get(i);
+        return alive.get(i);
     }
 
     public int getLength()
     {
         return warband.size();
     }
+
+    public int getNumAlive()
+    {
+        return alive.size();
+    }
+    public int getNumDead()
+    {
+        return dead.size();
+    }
+
+    public String getPlayer() {return player;}
 
     public String toString()
     {

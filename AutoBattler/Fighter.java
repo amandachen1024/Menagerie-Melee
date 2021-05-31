@@ -1,4 +1,5 @@
 package AutoBattler;
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import javax.swing.*;
 import java.awt.*;
@@ -18,13 +19,16 @@ public class Fighter extends JFrame
     private JLabel healthLabel;
     private ImageIcon fighterImage;
     private ImageIcon scaledImage;
+    private ImageIcon hitImage;
+    private ImageIcon deadImage;
+    private ImageIcon scaledDeadImage;
 
-    private static final String[] possibleNames = {"fighter1", "fighter2", "fighter3", "fighter4", "fighter5"};
+    private static final String[] possibleNames = {"caterpalien", "swirly", "jellyjam", "f'stein", "bunny"};
     private static final String[] possibleImages = {"fighterImage00.png", "fighterImage01.png", "fighterImage02.png", "fighterImage03.png", "fighterImage04.png"};
     private static final int[] possibleAttacks = {2, 4, 7, 12, 5};
     private static final int[] possibleHealths = {20, 13, 4, 2, 15};
 
-    public Fighter(int n /*, Warband p*/)
+    public Fighter(int n, Warband p)
     {
         name = possibleNames[n];
         imageFile = possibleImages[n];
@@ -32,11 +36,9 @@ public class Fighter extends JFrame
         initHealth = possibleHealths[n];
         currentHealth = initHealth;
 
-        /*
         player = p;
-        p.addFighter(this);
+        //p.addFighter(this);
 
-         */
 
         panel = new JPanel();
         panel.setLayout(new GridBagLayout());
@@ -44,8 +46,12 @@ public class Fighter extends JFrame
         //panel.setSize(300, 300);
 
         imageLabel = new JLabel();
-        fighterImage = new ImageIcon(getClass().getResource(imageFile));
+        fighterImage = new ImageIcon(getClass().getResource("AutoBattlerImages/" + imageFile));
         scaledImage = new ImageIcon(fighterImage.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT));
+        deadImage = new ImageIcon(getClass().getResource("AutoBattlerImages/image02.png")); // STAND-IN DEADIMAGE FROM GOOGLE IMAGES
+        scaledDeadImage = new ImageIcon(deadImage.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT));
+
+
         imageLabel.setIcon(scaledImage);
 
         c.fill = GridBagConstraints.VERTICAL;
@@ -86,35 +92,40 @@ public class Fighter extends JFrame
 
     }
 
-    public static void attack(Fighter attacker, Fighter defender)
+    public static String attack(Fighter attacker, Fighter defender)
     {
-        System.out.println(attacker.getName() + " attacks " + defender.getName());
+        System.out.println(attacker.getPlayer() + "'s " + attacker.getName() + " attacks " + defender.getPlayer() + "'s " +defender.getName());
         attacker.beHit(defender);
         defender.beHit(attacker);
         System.out.println("Attacker: " + attacker);
         System.out.println("Defender: " + defender);
+        return (attacker.getPlayer() + "'s " + attacker.getName() + " attacks " + defender.getPlayer() + "'s " +defender.getName());
     }
 
     public void beHit(Fighter opponent)
     {
         currentHealth -= opponent.getAttack();
-        attackLabel.setText(String.valueOf(currentHealth));
+        healthLabel.setText(String.valueOf(currentHealth));
         if (currentHealth <= 0)
         {
-            die();
+            this.die();
         }
     }
 
-    public void die()
+    public String die()
     {
         System.out.println(name + " has died");
         // code to make it disappear and remove it from list
         player.removeFighter(this);
+        imageLabel.setIcon(scaledDeadImage);
+        return (name + " has died");
     }
 
     public String getName() {
         return name;
     }
+
+    public String getPlayer() {return player.getPlayer();}
 
     public int getAttack() {
         return attack;
@@ -137,16 +148,17 @@ public class Fighter extends JFrame
         return ("\nname = " + name + "\nattack = " + attack + "\nhealth = " + currentHealth);
     }
 
+    /*
     public static void main(String[] args)
     {
         JFrame frame = new JFrame();
-        Fighter f = new Fighter(1);
+        Fighter f = new Fighter(1,);
         frame.setSize(200, 200);
         frame.add(f.getPanel());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
 
-
+     */
 
 }

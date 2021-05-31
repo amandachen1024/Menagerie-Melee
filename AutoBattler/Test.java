@@ -8,9 +8,9 @@ public class Test
     public static void recruit(Warband w)
     {
         for (int i = 0; i < 5; i++) {
-            Fighter option1 = new Fighter((int) (Math.random() * 5));
-            Fighter option2 = new Fighter((int) (Math.random() * 5));
-            Fighter option3 = new Fighter((int) (Math.random() * 5));
+            Fighter option1 = new Fighter((int) (Math.random() * 5), w);
+            Fighter option2 = new Fighter((int) (Math.random() * 5), w);
+            Fighter option3 = new Fighter((int) (Math.random() * 5), w);
             HashMap<String, Fighter> map = new HashMap<String, Fighter>();
             map.put("1", option1);
             map.put("2", option2);
