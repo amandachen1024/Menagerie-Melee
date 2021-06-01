@@ -42,6 +42,11 @@ public class Warband
 
     public Fighter getFighter(int i)
     {
+        return warband.get(i);
+    }
+
+    public Fighter getAlive(int i)
+    {
         return alive.get(i);
     }
 
@@ -54,10 +59,13 @@ public class Warband
     {
         return alive.size();
     }
+
     public int getNumDead()
     {
         return dead.size();
     }
+
+    public boolean hasLost(){return alive.size() <= 0;}
 
     public String getPlayer() {return player;}
 

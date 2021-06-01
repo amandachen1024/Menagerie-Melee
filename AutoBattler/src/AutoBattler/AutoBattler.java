@@ -3,6 +3,7 @@ import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -24,11 +25,14 @@ public class AutoBattler extends JFrame implements ActionListener
     private static JLabel recruitLabel;
     private static JButton startBattle;
     private static JLabel battleLabel;
+    private static JLabel endLabel;
+    private static JLabel resultLabel;
 
     private static JPanel startPanel;
     private static JPanel recruitPanel;
     private static JPanel battlePanel;
-    private static JPanel fightPanel;
+    public static JPanel fightPanel;
+    private static JPanel endPanel;
     private static GridBagConstraints constraints;
 
     private static Warband currentWarband;
@@ -51,6 +55,7 @@ public class AutoBattler extends JFrame implements ActionListener
         recruitPanel = new JPanel(new GridBagLayout());
         battlePanel = new JPanel();
         fightPanel = new JPanel(new GridBagLayout());
+        endPanel = new JPanel(new GridBagLayout());
         constraints = new GridBagConstraints();
 
         startButton = new JButton("Press to start");
@@ -67,6 +72,9 @@ public class AutoBattler extends JFrame implements ActionListener
 
         battleLabel = new JLabel("Battle begins");
         battleLabel.setSize(200, 200);
+
+        endLabel = new JLabel("GAME OVER");
+        resultLabel = new JLabel();
 
         constraints.gridx = 1;
         constraints.gridy = 0;
@@ -95,6 +103,13 @@ public class AutoBattler extends JFrame implements ActionListener
         constraints.gridy = 1;
         fightPanel.add(battleLabel, constraints);
         constraints.fill = 0;
+
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        endPanel.add(endLabel, constraints);
+        constraints.gridy = 1;
+        endPanel.add(resultLabel, constraints);
+
 
 
         /*
@@ -133,13 +148,14 @@ public class AutoBattler extends JFrame implements ActionListener
         c.add("recruitPanel", recruitPanel);
         c.add("battlePanel", battlePanel);
         c.add("fightPanel", fightPanel);
+        c.add("endPanel", endPanel);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //pack();
         setVisible(true);
 
     }
-    public static void recruit(Warband w) {
+    public static void recruit(Warband w) throws IOException {
         currentWarband = w;
         recruitLabel.setText("Recruit for " + currentWarband.getPlayer());
         recruitPanel.removeAll();
@@ -222,7 +238,13 @@ public class AutoBattler extends JFrame implements ActionListener
                 currentWarband.addFighter((fighterMap.get(choice)));
                 System.out.println(currentWarband);
                 if (currentWarband.getLength() < 5) {
-                    recruit(currentWarband);
+
+                    try {
+                        recruit(currentWarband);
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+
                 }
                 else
                 {
@@ -243,7 +265,7 @@ public class AutoBattler extends JFrame implements ActionListener
 
 
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         new AutoBattler();
         lock = new Object();
         synchronized (lock)
@@ -276,12 +298,19 @@ public class AutoBattler extends JFrame implements ActionListener
         }
         int counter1 = 0;
         int counter2 = 0;
-        while (w1.getNumAlive() > 0 && w2.getNumAlive() > 0) {
+        while (!w1.hasLost() && !w2.hasLost()) {
+            /*
             if (counter1 > w1.getNumAlive()-1)
             {
                 counter1 = 0;
             }
-            battleLabel.setText(Fighter.attack(w1.getFighter(counter1), w2.getFighter((int) (Math.random()*w2.getNumAlive()))));
+
+             */
+            while (!w1.getFighter(counter1 % 5).isAlive())
+            {
+                counter1++;
+            }
+            battleLabel.setText(Fighter.attack(w1.getFighter(counter1 % 5), w2.getAlive((int) (Math.random()*w2.getNumAlive()))));
             fightPanel.repaint();
             fightPanel.revalidate();
             counter1++;
@@ -289,23 +318,45 @@ public class AutoBattler extends JFrame implements ActionListener
             {
                 lock.wait(1000);
             }
-            if (w1.getNumAlive() <= 0 || w2.getNumAlive() <= 0)
+            if (w1.hasLost() || w2.hasLost())
             {
                 break;
             }
+            /*
             if (counter2 > w2.getNumAlive()-1)
             {
                 counter2 = 0;
             }
-            battleLabel.setText(Fighter.attack(w2.getFighter(counter2), w1.getFighter((int) (Math.random()*w1.getNumAlive()))));
-            fightPanel.repaint();
-            fightPanel.revalidate();
+
+             */
+            while (!w2.getFighter(counter2 % 5).isAlive())
+            {
+                counter2++;
+            }
+            battleLabel.setText(Fighter.attack(w2.getFighter(counter2 % 5), w1.getAlive((int) (Math.random()*w1.getNumAlive()))));
+            //fightPanel.repaint();
+            //fightPanel.revalidate();
             counter2++;
             synchronized (lock)
             {
-                lock.wait(2000);
+                lock.wait(1500);
             }
         }
+        if (w1.hasLost() && w2.hasLost())
+        {
+            resultLabel.setText("It's a tie!");
+        }
+        else if (w1.hasLost())
+        {
+            resultLabel.setText(w2.getPlayer() + " wins!");
+        }
+        else
+        {
+            resultLabel.setText(w1.getPlayer() + " wins!");
+        }
+        endPanel.repaint();
+        endPanel.revalidate();
+        card.next(c);
         System.out.println("done");
 
     }

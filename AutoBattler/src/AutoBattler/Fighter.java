@@ -1,5 +1,6 @@
 package AutoBattler;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Arrays;
 import javax.swing.*;
 import java.awt.*;
@@ -20,16 +21,19 @@ public class Fighter extends JFrame
     private ImageIcon fighterImage;
     private ImageIcon scaledImage;
     private ImageIcon hitImage;
+    private ImageIcon scaledHitImage;
     private ImageIcon deadImage;
     private ImageIcon scaledDeadImage;
 
+    private ImageChanger imageChanger = new ImageChanger();
+    private static Object lock = new Object();
+
     private static final String[] possibleNames = {"caterpalien", "swirly", "jellyjam", "f'stein", "bunny"};
-    private static final String[] possibleImages = {"fighterImage00.png", "fighterImage01.png", "fighterImage02.png", "fighterImage03.png", "fighterImage04.png"};
+    private static final String[] possibleImages = {"AutoBattlerImages/fighterImage00.png", "AutoBattlerImages/fighterImage01.png", "AutoBattlerImages/fighterImage02.png", "AutoBattlerImages/fighterImage03.png", "AutoBattlerImages/fighterImage04.png"};
     private static final int[] possibleAttacks = {2, 4, 7, 12, 5};
     private static final int[] possibleHealths = {20, 13, 4, 2, 15};
 
-    public Fighter(int n, Warband p)
-    {
+    public Fighter(int n, Warband p) throws IOException {
         name = possibleNames[n];
         imageFile = possibleImages[n];
         attack = possibleAttacks[n];
@@ -46,11 +50,12 @@ public class Fighter extends JFrame
         //panel.setSize(300, 300);
 
         imageLabel = new JLabel();
-        fighterImage = new ImageIcon(getClass().getResource("AutoBattlerImages/" + imageFile));
+        fighterImage = new ImageIcon(getClass().getResource(imageFile));
         scaledImage = new ImageIcon(fighterImage.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT));
-        deadImage = new ImageIcon(getClass().getResource("AutoBattlerImages/image02.png")); // STAND-IN DEADIMAGE FROM GOOGLE IMAGES
+        deadImage = new ImageIcon(imageChanger.invertColours(imageFile));
         scaledDeadImage = new ImageIcon(deadImage.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT));
-
+        hitImage = new ImageIcon(imageChanger.makeRed(imageFile));
+        scaledHitImage = new ImageIcon(hitImage.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT));
 
         imageLabel.setIcon(scaledImage);
 
@@ -92,9 +97,17 @@ public class Fighter extends JFrame
 
     }
 
-    public static String attack(Fighter attacker, Fighter defender)
-    {
+    public static String attack(Fighter attacker, Fighter defender) throws InterruptedException {
         System.out.println(attacker.getPlayer() + "'s " + attacker.getName() + " attacks " + defender.getPlayer() + "'s " +defender.getName());
+
+        attacker.imageLabel.setIcon(attacker.scaledHitImage);
+        //defender.panel.repaint();
+        //defender.panel.revalidate();
+        defender.imageLabel.setIcon(defender.scaledHitImage);
+        //attacker.panel.repaint();
+        //attacker.panel.revalidate();
+        AutoBattler.fightPanel.repaint();
+        AutoBattler.fightPanel.revalidate();
         attacker.beHit(defender);
         defender.beHit(attacker);
         System.out.println("Attacker: " + attacker);
@@ -102,13 +115,22 @@ public class Fighter extends JFrame
         return (attacker.getPlayer() + "'s " + attacker.getName() + " attacks " + defender.getPlayer() + "'s " +defender.getName());
     }
 
-    public void beHit(Fighter opponent)
-    {
+    public void beHit(Fighter opponent) throws InterruptedException {
         currentHealth -= opponent.getAttack();
         healthLabel.setText(String.valueOf(currentHealth));
+        synchronized (lock)
+        {
+            lock.wait(500);
+        }
         if (currentHealth <= 0)
         {
             this.die();
+        }
+        else{
+
+            imageLabel.setIcon(scaledImage);
+            AutoBattler.fightPanel.repaint();
+            AutoBattler.fightPanel.revalidate();
         }
     }
 
@@ -119,6 +141,11 @@ public class Fighter extends JFrame
         player.removeFighter(this);
         imageLabel.setIcon(scaledDeadImage);
         return (name + " has died");
+    }
+
+    public boolean isAlive()
+    {
+        return currentHealth > 0;
     }
 
     public String getName() {
