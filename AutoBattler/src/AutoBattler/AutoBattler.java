@@ -15,6 +15,8 @@ public class AutoBattler extends JFrame implements ActionListener
 
     private static String choice = "";
 
+    private static JLabel introHeader;
+    private static JLabel instructions;
     private static JButton startButton;
     private static JTextField textField1;
     private static JTextField textField2;
@@ -28,10 +30,10 @@ public class AutoBattler extends JFrame implements ActionListener
     private static JLabel endLabel;
     private static JLabel resultLabel;
 
-    private static JPanel startPanel;
-    private static JPanel recruitPanel;
+    private static ImagePanel startPanel;
+    private static ImagePanel recruitPanel;
     private static JPanel battlePanel;
-    public static JPanel fightPanel;
+    public static ImagePanel fightPanel;
     private static JPanel endPanel;
     private static GridBagConstraints constraints;
 
@@ -49,19 +51,33 @@ public class AutoBattler extends JFrame implements ActionListener
 
     public AutoBattler()
     {
-        setSize(1750, 1000);
+        setSize(1500, 900);
 
-        startPanel = new JPanel(new GridBagLayout());
-        recruitPanel = new JPanel(new GridBagLayout());
+        startPanel = new ImagePanel(new ImageIcon("src/AutoBattler/AutoBattlerImages/startBackground.png").getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT));
+        startPanel.setLayout(new GridBagLayout());
+        recruitPanel = new ImagePanel(new ImageIcon("src/AutoBattler/AutoBattlerImages/recruitBackground.png").getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT));
+        recruitPanel.setLayout(new GridBagLayout());
         battlePanel = new JPanel();
-        fightPanel = new JPanel(new GridBagLayout());
+        fightPanel = new ImagePanel(new ImageIcon("src/AutoBattler/AutoBattlerImages/battleBackground.png").getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT));
+        fightPanel.setLayout(new GridBagLayout());
         endPanel = new JPanel(new GridBagLayout());
         constraints = new GridBagConstraints();
 
+        introHeader = new JLabel("Welcome to Autobattler!");
+        introHeader.setFont(new Font("Verdana", Font.BOLD, 20));
+        instructions = new JLabel();
+        instructions.setFont(new Font("Verdana", Font.PLAIN, 14));
+        instructions.setText("<html><div style=\"width: 500px;\"> This is a turn-based autobattler for you to test your RNG against your friend using different fighters to duke it out. This game will consists of 2 phases: recruiting fighters and a battle. <p><p>" +
+                "<b>RECRUITING: </b><p><p>" +
+                "After entering your names, each of you will choose 5 fighters to add to your warband. For each, you will be able to choose 1 out of 3 different options (if you are especially unlucky, you may be offered 3 of the same fighter) <p><p>" +
+                "<b>BATTLE: </b><p><p>" +
+                "After you each choose your fighters, they will fight to determine a winner. Player 1's first minion will randomly attack one of Player 2's. Then, Player 2's first minion will attack one of Player 1's. The next living fighter on each warband will attack randomly until one player has no more fighters. <p><p>" +
+                "Then, a winner will be declared.</div></html>");
         startButton = new JButton("Press to start");
         textField1 = new JTextField("Player 1");
         textField2 = new JTextField("Player 2");
         startLabel = new JLabel("Enter your names:");
+        startLabel.setFont(new Font("Verdana", Font.PLAIN, 16));
 
         recruitLabel = new JLabel();
         choose1 = new JButton("Choose 1st option");
@@ -71,46 +87,59 @@ public class AutoBattler extends JFrame implements ActionListener
         startBattle = new JButton("Start battle");
 
         battleLabel = new JLabel("Battle begins");
-        battleLabel.setSize(200, 200);
+        battleLabel.setHorizontalAlignment(JLabel.LEFT);
 
         endLabel = new JLabel("GAME OVER");
         resultLabel = new JLabel();
 
         constraints.gridx = 1;
         constraints.gridy = 0;
-        constraints.ipady = 100;
-        startPanel.add(startLabel, constraints);
+        constraints.ipady = 25;
+        startPanel.add(introHeader, constraints);
 
         constraints.gridy = 1;
-        constraints.ipady = 0;
-        constraints.ipadx = 25;
+        constraints.ipady = 50;
+        //constraints.weightx = 2;
+        //constraints.fill = GridBagConstraints.HORIZONTAL;
+        startPanel.add(instructions, constraints);
+
+        constraints.fill = 0;
+        //constraints.weightx = 0.25;
+        constraints.ipady = 15;
+        constraints.gridy = 2;
+        startPanel.add(startLabel, constraints);
+
+        constraints.gridy = 3;
+        constraints.ipady = 5;
+        constraints.ipadx = 100;
         startPanel.add(textField1, constraints);
 
-        constraints.gridy = 2;
+        constraints.gridy = 4;
         startPanel.add(textField2, constraints);
 
-        constraints.gridy = 4;
-        constraints.ipady = 10;
+        constraints.gridy = 5;
+        constraints.ipady = 15;
         constraints.ipadx = 0;
         startPanel.add(startButton, constraints);
 
         battlePanel.add(startBattle);
 
         constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.fill = GridBagConstraints.VERTICAL;
+        //constraints.fill = GridBagConstraints.VERTICAL;
+        constraints.ipadx = 0;
         constraints.ipady = 100;
         constraints.gridx = 2;
         constraints.gridy = 1;
+        constraints.gridwidth = 3;
         fightPanel.add(battleLabel, constraints);
         constraints.fill = 0;
+        constraints.gridwidth = 1;
 
         constraints.gridx = 1;
         constraints.gridy = 0;
         endPanel.add(endLabel, constraints);
         constraints.gridy = 1;
         endPanel.add(resultLabel, constraints);
-
-
 
         /*
         Fighter fighter1 = new Fighter(1);
@@ -134,10 +163,10 @@ public class AutoBattler extends JFrame implements ActionListener
         constraints.gridx = 4;
         constraints.gridy = 2;
         fightPanel.add(fighter5.getPanel(), constraints);
-
          */
+
         c = getContentPane();
-        card = new CardLayout(40, 30);
+        card = new CardLayout();
         c.setLayout(card);
         startButton.addActionListener(this);
         choose1.addActionListener(new OptionClicked("choose1"));
@@ -151,12 +180,12 @@ public class AutoBattler extends JFrame implements ActionListener
         c.add("endPanel", endPanel);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //pack();
         setVisible(true);
 
     }
     public static void recruit(Warband w) throws IOException {
         currentWarband = w;
+        recruitLabel.setFont(new Font("Verdana", Font.PLAIN, 20));
         recruitLabel.setText("Recruit for " + currentWarband.getPlayer());
         recruitPanel.removeAll();
         constraints.gridx = 1;
@@ -164,14 +193,14 @@ public class AutoBattler extends JFrame implements ActionListener
         constraints.ipady = 100;
         recruitPanel.add(recruitLabel, constraints);
             choiceMade = false;
-            Fighter option1 = new Fighter((int) (Math.random() * 5), w);
-            Fighter option2 = new Fighter((int) (Math.random() * 5), w);
-            Fighter option3 = new Fighter((int) (Math.random() * 5), w);
+            Fighter option1 = new Fighter((int) (Math.random() * Fighter.getNumPossible()), w);
+            Fighter option2 = new Fighter((int) (Math.random() * Fighter.getNumPossible()), w);
+            Fighter option3 = new Fighter((int) (Math.random() * Fighter.getNumPossible()), w);
             fighterMap = new HashMap<String, Fighter>();
             fighterMap.put("choose1", option1);
             fighterMap.put("choose2", option2);
             fighterMap.put("choose3", option3);
-            //constraints.fill = GridBagConstraints.VERTICAL;
+            //constraints.fill = GridBagConstraints.BOTH;
             constraints.ipadx = 45;
             constraints.ipady = 0;
             constraints.gridx = 0;
@@ -204,7 +233,7 @@ public class AutoBattler extends JFrame implements ActionListener
     {
         for (int i = 0; i < w.getLength(); i++)
         {
-            constraints.ipadx = 25;
+            constraints.ipadx = 15;
             constraints.gridx = i;
             constraints.gridy = warbandMap.get(w);
             fightPanel.add(w.getFighter(i).getPanel(), constraints);
@@ -262,8 +291,6 @@ public class AutoBattler extends JFrame implements ActionListener
         }
 
     }
-
-
 
     public static void main(String[] args) throws InterruptedException, IOException {
         new AutoBattler();
