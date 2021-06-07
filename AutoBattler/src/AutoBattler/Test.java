@@ -36,7 +36,7 @@ public class Test
         System.out.println(warband2);
         Thread.sleep(1000);
         Fighter.attack(warband1.getFighter(0), warband2.getFighter((int) (warband2.getLength()*Math.random())));
-         */
+
 
         JFrame frame = new JFrame();
 
@@ -46,6 +46,17 @@ public class Test
         label.setIcon(icon);
         frame.add(label);
         frame.setSize(400, 400);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+
+         */
+
+        JFrame frame = new JFrame();
+        Warband w = new Warband("a");
+        Fighter f = new Fighter(6, w);
+        System.out.println(f);
+        frame.setSize(400, 400);
+        frame.add(f.getPanel());
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
