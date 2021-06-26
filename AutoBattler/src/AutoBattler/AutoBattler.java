@@ -25,6 +25,9 @@ public class AutoBattler extends JFrame implements ActionListener
     private static JButton choose2;
     private static JButton choose3;
     private static JLabel recruitLabel;
+    private static JLabel recapLabel;
+    private static JLabel p1recap;
+    private static JLabel p2recap;
     private static JButton startBattle;
     private static JLabel battleLabel;
     private static JLabel endLabel;
@@ -32,9 +35,9 @@ public class AutoBattler extends JFrame implements ActionListener
 
     private static ImagePanel startPanel;
     private static ImagePanel recruitPanel;
-    private static JPanel battlePanel;
+    private static ImagePanel recapPanel;
     public static ImagePanel fightPanel;
-    private static JPanel endPanel;
+    private static ImagePanel endPanel;
     private static GridBagConstraints constraints;
 
     private static Warband currentWarband;
@@ -51,16 +54,19 @@ public class AutoBattler extends JFrame implements ActionListener
 
     public AutoBattler()
     {
-        setSize(1500, 900);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setSize(screenSize.width, screenSize.height);
 
         startPanel = new ImagePanel(new ImageIcon("src/AutoBattler/AutoBattlerImages/startBackground.png").getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT));
         startPanel.setLayout(new GridBagLayout());
         recruitPanel = new ImagePanel(new ImageIcon("src/AutoBattler/AutoBattlerImages/recruitBackground.png").getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT));
         recruitPanel.setLayout(new GridBagLayout());
-        battlePanel = new JPanel();
+        recapPanel = new ImagePanel(new ImageIcon("src/AutoBattler/AutoBattlerImages/recapBackground.png").getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT));
+        recapPanel.setLayout(new GridBagLayout());
         fightPanel = new ImagePanel(new ImageIcon("src/AutoBattler/AutoBattlerImages/battleBackground.png").getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT));
         fightPanel.setLayout(new GridBagLayout());
-        endPanel = new JPanel(new GridBagLayout());
+        endPanel = new ImagePanel(new ImageIcon("src/AutoBattler/AutoBattlerImages/endBackground.png").getImage().getScaledInstance(getWidth(), getHeight(), Image.SCALE_DEFAULT));
+        endPanel.setLayout(new GridBagLayout());
         constraints = new GridBagConstraints();
 
         introHeader = new JLabel("Welcome to Autobattler!");
@@ -84,13 +90,22 @@ public class AutoBattler extends JFrame implements ActionListener
         choose2 = new JButton("Choose 2nd option");
         choose3 = new JButton("Choose 3rd option");
 
+        recapLabel = new JLabel("Recap - here's what you chose:");
+        recapLabel.setFont(new Font("Verdana", Font.PLAIN, 20));
+        p1recap = new JLabel();
+        p1recap.setFont(new Font("Verdana", Font.PLAIN, 16));
+        p2recap = new JLabel();
+        p2recap.setFont(new Font("Verdana", Font.PLAIN, 16));
         startBattle = new JButton("Start battle");
 
-        battleLabel = new JLabel("Battle begins");
-        battleLabel.setHorizontalAlignment(JLabel.LEFT);
+        battleLabel = new JLabel("The battle begins...");
+        battleLabel.setFont(new Font("Verdana", Font.PLAIN, 14));
+        battleLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         endLabel = new JLabel("GAME OVER");
         resultLabel = new JLabel();
+        resultLabel.setFont(new Font("Verdana", Font.PLAIN, 20));
+        resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         constraints.gridx = 1;
         constraints.gridy = 0;
@@ -122,24 +137,32 @@ public class AutoBattler extends JFrame implements ActionListener
         constraints.ipadx = 0;
         startPanel.add(startButton, constraints);
 
-        battlePanel.add(startBattle);
+
 
         constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.weightx = 0;
         //constraints.fill = GridBagConstraints.VERTICAL;
         constraints.ipadx = 0;
         constraints.ipady = 100;
-        constraints.gridx = 2;
+        constraints.gridx = 1;
         constraints.gridy = 1;
         constraints.gridwidth = 3;
         fightPanel.add(battleLabel, constraints);
         constraints.fill = 0;
         constraints.gridwidth = 1;
 
+        constraints.ipadx = 0;
+        constraints.ipady = 75;
         constraints.gridx = 1;
         constraints.gridy = 0;
-        endPanel.add(endLabel, constraints);
-        constraints.gridy = 1;
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridwidth = 3;
+        constraints.insets = new Insets(getHeight()/2-150, 0, 0, 0);
+        constraints.anchor = GridBagConstraints.CENTER;
         endPanel.add(resultLabel, constraints);
+        constraints.insets = new Insets(0, 0, 0, 0);
+        constraints.gridwidth = 1;
+        constraints.weightx = 0;
 
         /*
         Fighter fighter1 = new Fighter(1);
@@ -175,12 +198,14 @@ public class AutoBattler extends JFrame implements ActionListener
         startBattle.addActionListener(this);
         c.add("startPanel", startPanel);
         c.add("recruitPanel", recruitPanel);
-        c.add("battlePanel", battlePanel);
+        c.add("recapPanel", recapPanel);
         c.add("fightPanel", fightPanel);
         c.add("endPanel", endPanel);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
+        pack();
+        setSize(screenSize.width, screenSize.height);
 
     }
     public static void recruit(Warband w) throws IOException {
@@ -188,56 +213,104 @@ public class AutoBattler extends JFrame implements ActionListener
         recruitLabel.setFont(new Font("Verdana", Font.PLAIN, 20));
         recruitLabel.setText("Recruit for " + currentWarband.getPlayer());
         recruitPanel.removeAll();
+        constraints.gridwidth = 1;
+        constraints.weightx = 0;
+        constraints.weighty = 0;
         constraints.gridx = 1;
         constraints.gridy = 0;
         constraints.ipady = 100;
+        constraints.ipadx = 0;
         recruitPanel.add(recruitLabel, constraints);
-            choiceMade = false;
-            Fighter option1 = new Fighter((int) (Math.random() * Fighter.getNumPossible()), w);
-            Fighter option2 = new Fighter((int) (Math.random() * Fighter.getNumPossible()), w);
-            Fighter option3 = new Fighter((int) (Math.random() * Fighter.getNumPossible()), w);
-            fighterMap = new HashMap<String, Fighter>();
-            fighterMap.put("choose1", option1);
-            fighterMap.put("choose2", option2);
-            fighterMap.put("choose3", option3);
-            //constraints.fill = GridBagConstraints.BOTH;
-            constraints.ipadx = 45;
-            constraints.ipady = 0;
-            constraints.gridx = 0;
-            constraints.gridy = 1;
-            recruitPanel.add(option1.getPanel(), constraints);
-            constraints.gridx = 1;
-            constraints.gridy = 1;
-            recruitPanel.add(option2.getPanel(), constraints);
-            constraints.gridx = 2;
-            constraints.gridy = 1;
-            recruitPanel.add(option3.getPanel(), constraints);
-            constraints.gridx = 0;
-            constraints.gridy = 2;
-            recruitPanel.add(choose1, constraints);
+        choiceMade = false;
+        Fighter option1 = new Fighter((int) (Math.random() * Fighter.getNumPossible()), w);
+        Fighter option2 = new Fighter((int) (Math.random() * Fighter.getNumPossible()), w);
+        Fighter option3 = new Fighter((int) (Math.random() * Fighter.getNumPossible()), w);
+        fighterMap = new HashMap<String, Fighter>();
+        fighterMap.put("choose1", option1);
+        fighterMap.put("choose2", option2);
+        fighterMap.put("choose3", option3);
+        //constraints.fill = GridBagConstraints.BOTH;
+        constraints.ipadx = 45;
+        constraints.ipady = 10;
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        recruitPanel.add(option1.getPanel(), constraints);
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+        recruitPanel.add(option2.getPanel(), constraints);
+        constraints.gridx = 2;
+        constraints.gridy = 1;
+        recruitPanel.add(option3.getPanel(), constraints);
 
-            constraints.gridx = 1;
-            constraints.gridy = 2;
-            recruitPanel.add(choose2, constraints);
+        constraints.ipady = 0;
+        constraints.insets = new Insets(15, 0, 0, 0);
+        constraints.gridx = 0;
+        constraints.gridy = 3;
+        recruitPanel.add(choose1, constraints);
 
-            constraints.gridx = 2;
-            constraints.gridy = 2;
-            recruitPanel.add(choose3, constraints);
+        constraints.gridx = 1;
+        recruitPanel.add(choose2, constraints);
 
-            recruitPanel.revalidate();
-            recruitPanel.repaint();
+        constraints.gridx = 2;
+        recruitPanel.add(choose3, constraints);
+        constraints.insets = new Insets(0, 0, 0, 0);
+
+        recruitPanel.revalidate();
+        recruitPanel.repaint();
 
     }
 
-    static void showWarband(Warband w)
+    public static void showWarband(Warband w, JPanel panel, int row)
     {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.ipady = 0;
+        constraints.ipadx = 15;
+        constraints.gridwidth = 1;
+        constraints.weightx = 0;
+        constraints.insets = new Insets(0, 10, 0, 10);
         for (int i = 0; i < w.getLength(); i++)
         {
-            constraints.ipadx = 15;
             constraints.gridx = i;
-            constraints.gridy = warbandMap.get(w);
-            fightPanel.add(w.getFighter(i).getPanel(), constraints);
+            constraints.gridy = row;
+            panel.add(w.getFighter(i).getPanel(), constraints);
+            System.out.println(w.getFighter(i));
         }
+        constraints.insets = new Insets(0, 0, 0, 0);
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    static void paintRecapPanel()
+    {
+        constraints.anchor = GridBagConstraints.CENTER;
+        constraints.fill = 0;
+        constraints.gridwidth = 3;
+        constraints.ipady = 25;
+        constraints.gridy = 0;
+        constraints.gridx = 1;
+        recapPanel.add(recapLabel, constraints);
+
+        constraints.gridy = 1;
+        constraints.gridx = 1;
+        recapPanel.add(p1recap, constraints);
+
+        showWarband(w1, recapPanel, 2);
+
+        constraints.gridwidth = 3;
+        constraints.gridy = 3;
+        constraints.gridx = 1;
+        recapPanel.add(p2recap, constraints);
+
+        showWarband(w2, recapPanel, 4);
+
+        constraints.gridy = 5;
+        constraints.gridx = 1;
+        constraints.ipadx = 5;
+        constraints.ipady = 5;
+        constraints.insets = new Insets(25, 0, 0, 0);
+        recapPanel.add(startBattle, constraints);
+        constraints.insets = new Insets(0, 0, 0, 0);
+
     }
 
     @Override
@@ -303,6 +376,7 @@ public class AutoBattler extends JFrame implements ActionListener
         synchronized (lock)
         {
             w1 = new Warband(textField1.getText());
+            p1recap.setText(w1.getPlayer() + " chose these fighters:");
             recruit(w1);
             lock.wait();
         }
@@ -310,17 +384,15 @@ public class AutoBattler extends JFrame implements ActionListener
         synchronized (lock)
         {
             w2 = new Warband(textField2.getText());
+            p2recap.setText(w2.getPlayer() + " chose these fighters:");
             recruit(w2);
             lock.wait();
         }
-
-        warbandMap = new HashMap<Warband, Integer>();
-        warbandMap.put(w1, 0);
-        warbandMap.put(w2, 2);
-        showWarband(w1);
-        showWarband(w2);
+        paintRecapPanel();
         synchronized (lock) {
             lock.wait();
+            showWarband(w1, fightPanel, 0);
+            showWarband(w2, fightPanel, 2);
             lock.wait(2000);
         }
         int counter1 = 0;
@@ -376,10 +448,20 @@ public class AutoBattler extends JFrame implements ActionListener
         else if (w1.hasLost())
         {
             resultLabel.setText(w2.getPlayer() + " wins!");
+            for (int i = 0; i < w2.getLength(); i++)
+            {
+                w2.getFighter(i).revive();
+            }
+            showWarband(w2, endPanel, 2);
         }
         else
         {
             resultLabel.setText(w1.getPlayer() + " wins!");
+            for (int i = 0; i < w1.getLength(); i++)
+            {
+                w1.getFighter(i).revive();
+            }
+            showWarband(w1, endPanel, 2);
         }
         endPanel.repaint();
         endPanel.revalidate();

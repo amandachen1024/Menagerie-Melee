@@ -3,6 +3,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 public class Fighter extends JFrame
@@ -36,14 +38,17 @@ public class Fighter extends JFrame
 
     private ImageChanger imageChanger = new ImageChanger();
     private static Object lock = new Object();
+    private MatteBorder noTop = new MatteBorder(0, 2, 2, 2, Color.black);
+    private MatteBorder noBottom = new MatteBorder(2, 2, 0, 2, Color.black);
 
-    private static final String[] possibleNames = {"caterpalien", "swirly", "jellyjam", "f'stein", "bunny", "protractorfish", "delf"};
+
+    private static final String[] possibleNames = {"caterpalien", "swirly", "jellyjam", "f'stein", "bunny", "protractorfish", "delf", "emperor", "hummer"};
     private static final String[] possibleImages =
             {"AutoBattlerImages/fighterImage00.png","AutoBattlerImages/fighterImage01.png", "AutoBattlerImages/fighterImage02.png",
                     "AutoBattlerImages/fighterImage03.png", "AutoBattlerImages/fighterImage04.png", "AutoBattlerImages/fighterImage05.png",
-                    "AutoBattlerImages/fighterImage06.png"};
-    private static final int[] possibleAttacks = {3, 6, 8, 15, 5, 12, 7};
-    private static final int[] possibleHealths = {20, 13, 9, 2, 15, 4, 12};
+                    "AutoBattlerImages/fighterImage06.png", "AutoBattlerImages/fighterImage07.png", "AutoBattlerImages/fighterImage08.png"};
+    private static final int[] possibleAttacks = {3, 6, 8, 15, 5, 12, 7, 4, 9};
+    private static final int[] possibleHealths = {20, 13, 9, 2, 15, 4, 12, 17, 9};
     private static final int numPossible = possibleNames.length;
     private static final String attackIconFile = "AutoBattlerImages/attackIcon.png";
     private static final String healthIconFile = "AutoBattlerImages/healthIcon.png";
@@ -62,26 +67,21 @@ public class Fighter extends JFrame
         panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         panel.setOpaque(false);
-        panel.setPreferredSize(new Dimension(260, 260));
+        //panel.setPreferredSize(new Dimension(260, 260));
         panel.setBackground(Color.white);
         GridBagConstraints c = new GridBagConstraints();
 
-        nameLabel = new JLabel(name);
-        nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        nameLabel.setFont(new Font("Verdana", Font.PLAIN, 16));
-        infoLabel = new JLabel(" ");
-        infoLabel.setLayout(new GridBagLayout());
-        infoLabel.setFont(new Font("Verdana", Font.PLAIN, 16));
-        infoLabel.setBackground(Color.white);
-        infoLabel.setOpaque(true);
+
 
         imageLabel = new JLabel();
+        imageLabel.setBorder(noBottom);
         fighterImage = new ImageIcon(getClass().getResource(imageFile));
         scaledImage = new ImageIcon(fighterImage.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT));
         deadImage = new ImageIcon(imageChanger.invertColours(imageFile));
         scaledDeadImage = new ImageIcon(deadImage.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT));
         hitImage = new ImageIcon(imageChanger.makeRed(imageFile));
         scaledHitImage = new ImageIcon(hitImage.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT));
+
 
         attackIconLabel = new JLabel();
         healthIconLabel = new JLabel();
@@ -90,9 +90,20 @@ public class Fighter extends JFrame
         healthIcon = new ImageIcon(getClass().getResource(healthIconFile));
         scaledHealthIcon = new ImageIcon(healthIcon.getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT));
 
+        nameLabel = new JLabel(name);
+        nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        nameLabel.setFont(new Font("Verdana", Font.PLAIN, 16));
+        infoLabel = new JLabel(" ");
+        infoLabel.setLayout(new GridBagLayout());
+        infoLabel.setFont(new Font("Verdana", Font.PLAIN, 16));
+        infoLabel.setPreferredSize(new Dimension(imageLabel.getWidth(), scaledAttackIcon.getIconHeight()));
+        infoLabel.setBackground(Color.white);
+        infoLabel.setBorder(noTop);
+        infoLabel.setOpaque(true);
+
         imageLabel.setIcon(scaledImage);
 
-        c.fill = GridBagConstraints.VERTICAL;
+        c.fill = GridBagConstraints.BOTH;
         c.gridx = 1;
         c.gridy = 0;
         panel.add(imageLabel, c);
@@ -137,6 +148,7 @@ public class Fighter extends JFrame
         c.gridy = 1;
         c.ipady = 5;
         c.weightx = 0;
+        c.gridwidth = 3;
         c.fill = GridBagConstraints.BOTH;
         panel.add(infoLabel, c);
 
@@ -203,6 +215,14 @@ public class Fighter extends JFrame
         player.removeFighter(this);
         imageLabel.setIcon(scaledDeadImage);
         return (name + " has died");
+    }
+    public void revive()
+    {
+        currentHealth = initHealth;
+        imageLabel.setIcon(scaledImage);
+        healthLabel.setText(String.valueOf(currentHealth));
+        panel.revalidate();
+        panel.repaint();
     }
 
     public boolean isAlive()
