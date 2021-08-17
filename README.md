@@ -1,4 +1,4 @@
-# AutoBattler
+# Menagerie Melee
 
 ## Overview
 
