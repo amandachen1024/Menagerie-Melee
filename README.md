@@ -14,4 +14,4 @@ Starting with Player 1's 1st fighter and followed by Player 2's 1st, Player 1's 
 
 ### Note
 
-This is still a work in progress and will coontinue to be updated to improve the appearance of the GUI, add various features to the game, and add new fighters/characters. 
+This is still a work in progress and will continue to be updated to improve the appearance of the GUI, add various features to the game, and add new fighters/characters. 
