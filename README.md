@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a turn-based Autobattler game based on the premise of Hearthstone Battlegrounds. It was created in Intellij, using Swing GUI and Object-Oriented-Programming. Images were created by me unless otherwise specified in the comments (please do not steal them). This was part of a way to apply my learning about graphics in Java. The game itself supports 2 players and consists of a recruit and battle phase (see below). Each player has a warband consisting of 5 fighters that will fight their opponent in an RNG-based battle.
+This is a turn-based Autobattler game based on the premise of Hearthstone Battlegrounds. It was created in Intellij, using Swing GUI and Object-Oriented-Programming, and I created the images using Procreate. This was part of a way to apply my learning about graphics in Java. The game itself supports 2 players and consists of a recruit and battle phase (see below). Each player has a warband consisting of 5 fighters that will fight their opponent in an RNG-based battle.
 
 ## Recruit
 
