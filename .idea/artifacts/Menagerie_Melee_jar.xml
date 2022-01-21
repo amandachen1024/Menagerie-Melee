@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Menagerie-Melee:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Menagerie_Melee_jar</output-path>
+    <root id="archive" name="Menagerie-Melee.jar">
+      <element id="module-output" name="Menagerie-Melee" />
+    </root>
+  </artifact>
+</component>
